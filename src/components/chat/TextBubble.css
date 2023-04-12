@@ -1,0 +1,35 @@
+.bubble-line {
+	width: 100%;
+}
+
+.bubble-line.self {
+	text-align: right;
+}
+
+.bubble-line.self .bubble {
+	background-color: lightskyblue;
+	text-align: right;
+}
+
+.bubble {
+	display: inline-block;
+	margin: 0.5em 1em;
+	padding: 1em 2em;
+	color: white;
+	font-weight: bolder;
+	width: max-content;
+	border-radius: 6px;
+	background-color: lightcoral;
+}
+
+.bubble p {
+	margin: 0;
+}
+
+.bubble .b-author {
+	opacity: 0.7;
+}
+
+.bubble .b-message {
+	font-size: 1.5em;
+}

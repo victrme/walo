@@ -1,0 +1,12 @@
+#chat {
+	width: 100%;
+	min-height: 400px;
+	max-height: 60vh;
+	overflow-y: scroll;
+	padding: 2em;
+	margin-bottom: 4em;
+	background-color: #fafafa;
+	border-radius: 1em;
+	display: flex;
+	flex-direction: column;
+}
