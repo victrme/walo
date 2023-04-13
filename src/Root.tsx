@@ -1,10 +1,9 @@
-import { FormEvent, useEffect, useState, useRef } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 
 import { User, getAuth, onAuthStateChanged, getRedirectResult } from 'firebase/auth'
 import { getDatabase, ref, set, get, onValue } from 'firebase/database'
 import { initializeApp } from 'firebase/app'
 
-import Header from './components/Header'
 import Login from './components/Login'
 import Logout from './components/Logout'
 import Chat from './components/chat/Chat'
@@ -42,9 +41,6 @@ const database = getDatabase()
 export default function Root() {
 	const [uid, setUid] = useState('')
 	const [name, setName] = useState('')
-	const [isLoggedIn, setIsLoggedIn] = useState(false)
-
-	const nameInputRef = useRef()
 
 	async function submitPseudo(e: FormEvent) {
 		e.preventDefault()
@@ -74,12 +70,12 @@ export default function Root() {
 		})
 
 		onAuthStateChanged(auth, (user) => {
-			setIsLoggedIn(!!user)
-
 			if (user?.displayName) {
 				setName(user.displayName?.split(' ')[0])
+				setUid(user.uid)
 			} else {
 				setName('')
+				setUid('')
 			}
 
 			// get(ref(database, 'users/' + user?.uid)).then((snapshot) => {
@@ -100,9 +96,9 @@ export default function Root() {
 					<p>no chat, only walo</p>
 				</div>
 
-				<Chat name={name} isLoggedIn={isLoggedIn} />
+				<Chat name={name} uid={uid} />
 
-				{isLoggedIn ? <Logout /> : <Login />}
+				{uid ? <Logout /> : <Login />}
 			</main>
 		</>
 	)

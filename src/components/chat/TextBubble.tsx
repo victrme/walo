@@ -1,17 +1,19 @@
+import { ReactElement } from 'react'
+import { Message } from '../../types/Message'
 import './TextBubble.css'
 
 type TextBubble = {
-	author: string
-	self: boolean
-	msg?: string
+	children?: ReactElement
+	message: Message
 }
 
-export default function TextBubble({ author, msg, self }: TextBubble) {
+export default function TextBubble({ message, children }: TextBubble) {
 	return (
-		<div className={'bubble-line' + (self ? ' self' : '')}>
+		<div key={message.t} className={'bubble-line' + (message.self ? ' self' : '')}>
 			<div className='bubble'>
-				<p className='b-author'>{author}</p>
-				<p className='b-message'>{msg}</p>
+				<p className='b-author'>{message.author}</p>
+				<p className='b-message'>{message.msg}</p>
+				{children}
 			</div>
 		</div>
 	)
