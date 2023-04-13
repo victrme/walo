@@ -60,20 +60,22 @@ main {
 }
 
 main .title {
+	margin: 2em 2em 4em 2em;
+	padding: 3em 0;
+	color: #396bc9;
+	font-weight: bolder;
 	text-align: center;
+	background: white;
+	background-image: radial-gradient(#4686ff8c 1px, transparent 0);
+	background-size: 0.8em 0.8em;
 }
 
 main .title h1 {
-	margin: 1em 2em 0 2em;
-	padding: 1em 0;
-	color: #396bc9;
-	background: white;
-	background-image: radial-gradient(#4686ff8c 1px, transparent 0);
-	background-size: 0.4em 0.4em;
 	display: block;
 	text-align: center;
+	margin: 0;
 }
 
 main .title p {
-	margin-bottom: 4em;
+	margin: 0;
 }

@@ -92,7 +92,7 @@ export default function Root() {
 
 			<main>
 				<div className='title'>
-					<h1>Wallo</h1>
+					<h1>Walo</h1>
 					<p>no chat, only walo</p>
 				</div>
 
