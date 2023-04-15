@@ -29,9 +29,17 @@ export default function UserInput(props: any) {
 		props.handleInput(isValid ? val : props.input)
 	}
 
+	function isWALOValid() {
+		const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
+		return props.input.match(containsWALO)
+	}
+
 	function applyMessage(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault()
-		props.handleInputTimestamp('submit')
+
+		if (isWALOValid()) {
+			props.handleInputTimestamp('submit')
+		}
 	}
 
 	return (
