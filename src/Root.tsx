@@ -5,7 +5,6 @@ import { getDatabase, ref, set, get, onValue, DataSnapshot } from 'firebase/data
 import { initializeApp } from 'firebase/app'
 
 import Login from './components/Login'
-import Logout from './components/Logout'
 import Chat from './components/chat/Chat'
 
 import { Names } from './types/names'
@@ -25,21 +24,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const database = getDatabase()
-
-async function getNameOnLogin(user: User) {
-	const dbref = ref(database, 'names/' + user.uid)
-	const snapshot = await get(dbref)
-	let name = ''
-
-	if (snapshot.exists() && snapshot.val()) {
-		name = snapshot.val()
-	} else {
-		name = (user.displayName || 'user')?.split(' ')[0]
-		set(dbref, name)
-	}
-
-	return name
-}
 
 const defaultLogs: Log[] = [
 	[1, { uid: 'guy1', msg: 'walo ???' }],
@@ -79,10 +63,20 @@ export default function Root() {
 		setNames(data)
 	}
 
+	async function addNameOnFirstLogin(user: User) {
+		const dbref = ref(database, 'names/' + user.uid)
+		const snapshot = await get(dbref)
+
+		if (!snapshot.exists()) {
+			set(dbref, (user.displayName || 'user')?.split(' ')[0])
+		}
+	}
+
 	useEffect(() => {
 		onAuthStateChanged(auth, (user) => {
 			if (user?.displayName) {
 				setUid(user.uid)
+				addNameOnFirstLogin(user)
 				get(ref(database, 'log/')).then((snapshot) => handleLogs(snapshot))
 				get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 			} else {
@@ -112,7 +106,7 @@ export default function Root() {
 
 				<Chat uid={uid} names={names} sendMessage={sendMessage} serverLogs={serverLogs} />
 
-				{uid ? <Logout /> : <Login />}
+				<Login uid={uid} />
 			</main>
 		</>
 	)
