@@ -64,12 +64,10 @@ export default function Root() {
 		const data = snapshot.val()
 		if (!data) return
 
-		console.log('updates')
-
 		const logs = Object.entries(data)
 		const message = logs[0][1]
 
-		if (message) {
+		if (message || logs.length === 0) {
 			setServerLogs([...logs.sort()] as unknown as Log[])
 		}
 	}
@@ -95,8 +93,13 @@ export default function Root() {
 		})
 
 		// Get updates only if logged in
-		onValue(ref(database, 'log/'), (snapshot) => (uid ? handleLogs(snapshot) : null))
-		onValue(ref(database, 'names/'), (snapshot) => (uid ? handleNames(snapshot) : null))
+		onValue(ref(database, 'log/'), (snapshot) => {
+			if (uid) handleLogs(snapshot)
+		})
+
+		onValue(ref(database, 'names/'), (snapshot) => {
+			if (uid) handleNames(snapshot)
+		})
 	}, [])
 
 	return (
