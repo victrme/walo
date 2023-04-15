@@ -9,6 +9,7 @@ import { FormEvent } from 'react'
  *      The regexp is still valid when not all characters are included (eg: "wal", "w", "waaaaalllll")
  */
 const regexp = /^(w+(a+(l+(o+[^\w]*)?)?)?)?$/i
+const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
 
 export default function UserInput(props: any) {
 	function handleUserMessage(event: FormEvent<HTMLInputElement>) {
@@ -29,16 +30,14 @@ export default function UserInput(props: any) {
 		props.handleInput(isValid ? val : props.input)
 	}
 
-	function isWALOValid() {
-		const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
-		return props.input.match(containsWALO)
-	}
-
 	function applyMessage(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault()
 
-		if (isWALOValid()) {
+		if (props.input.match(containsWALO)) {
 			props.handleInputTimestamp('submit')
+			setTimeout(() => {
+				event.currentTarget?.scrollIntoView({ behavior: 'smooth' })
+			}, 10)
 		}
 	}
 
@@ -48,7 +47,7 @@ export default function UserInput(props: any) {
 				type='text'
 				id='chat-input'
 				name='chat-input'
-				placeholder='lache un walo'
+				placeholder='lâche un walo'
 				autoComplete='false'
 				spellCheck='false'
 				value={props.input}

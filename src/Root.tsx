@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getDatabase, ref, set, get, onValue, DataSnapshot } from 'firebase/database'
+import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
 
 import Login from './components/Login'
@@ -9,6 +9,16 @@ import Chat from './components/chat/Chat'
 
 import { Names } from './types/names'
 import { Log } from './types/log'
+
+const defaultLogs: Log[] = [
+	[1, { uid: 'guy1', msg: 'walo ???' }],
+	[2, { uid: 'guy2', msg: 'waalo !' }],
+]
+
+const defaultNames: Names = {
+	guy1: 'Jean-Louis',
+	guy2: 'Julien',
+}
 
 const firebaseConfig = {
 	databaseURL: import.meta.env.VITE_DATABASEURL,
@@ -24,16 +34,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const database = getDatabase()
-
-const defaultLogs: Log[] = [
-	[1, { uid: 'guy1', msg: 'walo ???' }],
-	[2, { uid: 'guy2', msg: 'waalo !' }],
-]
-
-const defaultNames: Names = {
-	guy1: 'Jean-Louis',
-	guy2: 'Julien',
-}
 
 export default function Root() {
 	const [uid, setUid] = useState<string | null>(null)
@@ -86,14 +86,8 @@ export default function Root() {
 			}
 		})
 
-		// Get updates only if logged in
-		onValue(ref(database, 'log/'), (snapshot) => {
-			if (uid) handleLogs(snapshot)
-		})
-
-		onValue(ref(database, 'names/'), (snapshot) => {
-			if (uid) handleNames(snapshot)
-		})
+		onValue(ref(database, 'log/'), (snapshot) => handleLogs(snapshot))
+		onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
 	}, [])
 
 	return (

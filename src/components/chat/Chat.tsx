@@ -13,6 +13,18 @@ type Chat = {
 	sendMessage: (log: Log) => void
 }
 
+function MessageList(props: { list: Message[] }) {
+	return (
+		<>
+			{props.list.map((elem) => (
+				<div key={elem.t}>
+					<TextBubble message={elem} />
+				</div>
+			))}
+		</>
+	)
+}
+
 export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 	const [inputTimestamp, setInputTimestamp] = useState(10 ** 16)
 	const [input, setInput] = useState('')
@@ -57,9 +69,7 @@ export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 
 	return (
 		<div id='chat'>
-			{messagesOld.map((elem) => (
-				<TextBubble message={elem} />
-			))}
+			<MessageList list={messagesOld} />
 
 			{uid && (
 				<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
@@ -72,9 +82,9 @@ export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 				</TextBubble>
 			)}
 
-			{messagesNew.map((elem) => (
-				<TextBubble message={elem} />
-			))}
+			<MessageList list={messagesNew} />
+
+			<div id='scroll-anchor' />
 		</div>
 	)
 }

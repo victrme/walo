@@ -9,6 +9,13 @@
 	margin: auto auto 4em auto;
 	background-color: #fafafa;
 	border-radius: 1em;
-	display: flex;
-	flex-direction: column;
+}
+
+#chat * {
+	overflow-anchor: none;
+}
+
+#chat #scroll-anchor {
+	overflow-anchor: auto;
+	height: 1px;
 }
