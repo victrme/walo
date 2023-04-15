@@ -11,7 +11,16 @@ import { FormEvent } from 'react'
 const regexp = /^(w+(a+(l+(o+[^\w]*)?)?)?)?$/i
 const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
 
-export default function UserInput(props: any) {
+type UserInputProps = {
+	input: string
+	timestamp: number
+	handleInput: (input: string) => void
+	handleTimestamp: (is: 'focus' | 'submit') => void
+}
+
+export default function UserInput(props: UserInputProps) {
+	//
+
 	function handleUserMessage(event: FormEvent<HTMLInputElement>) {
 		const nativeEvent = event?.nativeEvent as InputEvent | undefined
 		const val = event.currentTarget.value
@@ -23,8 +32,8 @@ export default function UserInput(props: any) {
 		}
 
 		// Start timestamp on first input
-		if (props.inputTimestamp === 10 ** 16 && !props.input && isValid) {
-			props.handleInputTimestamp('focus')
+		if (props.timestamp === 10 ** 16 && !props.input && isValid) {
+			props.handleTimestamp('focus')
 		}
 
 		props.handleInput(isValid ? val : props.input)
@@ -34,7 +43,10 @@ export default function UserInput(props: any) {
 		event.preventDefault()
 
 		if (props.input.match(containsWALO)) {
-			props.handleInputTimestamp('submit')
+			props.handleTimestamp('submit')
+
+			// settimeout to wait a bit before message is added to database
+			// without wait, the input is not correctly into view
 			setTimeout(() => {
 				event.currentTarget?.scrollIntoView({ behavior: 'smooth' })
 			}, 10)
@@ -47,9 +59,9 @@ export default function UserInput(props: any) {
 				type='text'
 				id='chat-input'
 				name='chat-input'
-				placeholder='lâche un walo'
-				autoComplete='false'
 				spellCheck='false'
+				autoComplete='false'
+				placeholder='lâche un walo'
 				value={props.input}
 				onChange={(e) => handleUserMessage(e)}
 			/>

@@ -1,8 +1,21 @@
 import { useEffect, useState } from 'react'
 
-import { getDatabase, ref, set, get, onValue, DataSnapshot } from 'firebase/database'
-import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
+import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
+import {
+	getDatabase,
+	ref,
+	set,
+	get,
+	off,
+	push,
+	query,
+	update,
+	onValue,
+	limitToLast,
+	orderByChild,
+	DataSnapshot,
+} from 'firebase/database'
 
 import Login from './components/Login'
 import Chat from './components/chat/Chat'
@@ -11,8 +24,8 @@ import { Names } from './types/names'
 import { Log } from './types/log'
 
 const defaultLogs: Log[] = [
-	[1, { uid: 'guy1', msg: 'walo ???' }],
-	[2, { uid: 'guy2', msg: 'waalo !' }],
+	{ t: 1, uid: 'guy1', msg: 'walo ???' },
+	{ t: 2, uid: 'guy2', msg: 'waalo !' },
 ]
 
 const defaultNames: Names = {
@@ -34,26 +47,46 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const database = getDatabase()
+const queryContrains = [limitToLast(100), orderByChild('t')]
+const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
 
 export default function Root() {
 	const [uid, setUid] = useState<string | null>(null)
+	const [msgKey, setMsgKey] = useState<string | null>(null)
 	const [names, setNames] = useState<Names>(defaultNames)
 	const [serverLogs, setServerLogs] = useState<Log[]>(defaultLogs)
 
 	function sendMessage(log: Log) {
-		set(ref(database, 'log/' + log[0]), log[1])
+		//
+		// Update message (other keypresses)
+		if (msgKey) {
+			update(ref(database, 'logs/' + msgKey), { msg: log.msg })
+			return
+		}
+
+		// New message (first keypress)
+		const dbref = ref(database, 'logs/')
+		const msgRef = push(dbref)
+
+		if (!msgRef.key) {
+			return console.error('No key for new message')
+		}
+
+		set(ref(database, 'logs/' + msgRef.key), log)
+		handleMessageKey(msgRef.key)
 	}
 
 	function handleLogs(snapshot: DataSnapshot) {
-		const data = snapshot.val()
-		if (!data) return
+		const data = snapshot.val() ?? []
+		const logs = Object.values(data)
 
-		const logs = Object.entries(data)
-		const message = logs[0][1]
+		if (!logs) return
 
-		if (message || logs.length === 0) {
-			setServerLogs([...logs.sort()] as unknown as Log[])
-		}
+		setServerLogs(logs as Log[])
+	}
+
+	function handleMessageKey(val: string | null) {
+		setMsgKey(val)
 	}
 
 	function handleNames(snapshot: DataSnapshot) {
@@ -77,7 +110,7 @@ export default function Root() {
 			if (user?.displayName) {
 				setUid(user.uid)
 				addNameOnFirstLogin(user)
-				get(ref(database, 'log/')).then((snapshot) => handleLogs(snapshot))
+				get(queryLogs).then((snapshot) => handleLogs(snapshot))
 				get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 			} else {
 				setUid(null)
@@ -86,8 +119,13 @@ export default function Root() {
 			}
 		})
 
-		onValue(ref(database, 'log/'), (snapshot) => handleLogs(snapshot))
 		onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
+		onValue(queryLogs, (snapshot) => handleLogs(snapshot))
+
+		return () => {
+			off(ref(database, 'logs/'))
+			off(ref(database, 'names/'))
+		}
 	}, [])
 
 	return (
@@ -98,8 +136,13 @@ export default function Root() {
 					<p>no chat, only walo</p>
 				</div>
 
-				<Chat uid={uid} names={names} sendMessage={sendMessage} serverLogs={serverLogs} />
-
+				<Chat
+					uid={uid}
+					names={names}
+					serverLogs={serverLogs}
+					sendMessage={sendMessage}
+					handleMessageKey={handleMessageKey}
+				/>
 				<Login uid={uid} />
 			</main>
 		</>

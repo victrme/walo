@@ -11,6 +11,7 @@ type Chat = {
 	names: Names
 	serverLogs: Log[]
 	sendMessage: (log: Log) => void
+	handleMessageKey: (val: string | null) => void
 }
 
 function MessageList(props: { list: Message[] }) {
@@ -25,31 +26,35 @@ function MessageList(props: { list: Message[] }) {
 	)
 }
 
-export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
-	const [inputTimestamp, setInputTimestamp] = useState(10 ** 16)
+export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMessage }: Chat) {
 	const [input, setInput] = useState('')
+	const [timestamp, setTimestamp] = useState(10 ** 16)
 	const userFirstName = (uid: string) => names[uid] || 'user'
 
-	const messages: Message[] = serverLogs.map(([t, log]) => ({
-		t: t,
+	const messages: Message[] = serverLogs.map((log) => ({
+		t: log.t,
 		msg: log.msg,
 		self: log.uid === uid,
 		author: userFirstName(log.uid),
 	}))
 
 	// Divide messages between older and newer messages
-	const messagesOld = messages.filter((elem) => elem.t < inputTimestamp)
-	const messagesNew = messages.filter((elem) => elem.t > inputTimestamp)
+	const messagesOld = messages.filter((elem) => elem.t < timestamp)
+	const messagesNew = messages.filter((elem) => elem.t > timestamp)
 
-	function handleInputTimestamp(is: 'focus' | 'submit') {
-		const isDefault = inputTimestamp === 10 ** 16
+	function handleTimestamp(is: 'focus' | 'submit') {
+		const isDefault = timestamp === 10 ** 16
 
-		if (isDefault && is === 'focus') setInputTimestamp(Date.now())
+		if (isDefault && is === 'focus') {
+			setTimestamp(Date.now())
+		}
+
 		if (!isDefault && is === 'submit') {
-			setInputTimestamp(10 ** 16)
+			setTimestamp(10 ** 16)
 
 			if (input && uid) {
 				handleInput('')
+				handleMessageKey(null)
 			}
 		}
 	}
@@ -62,10 +67,10 @@ export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 		// ... send to database when timestamp updates
 		// ... it means new response has dropped
 		// ... holy hell !
-		if (uid && inputTimestamp !== 10 ** 16) {
-			sendMessage([inputTimestamp, { uid: uid, msg: input }])
+		if (uid && timestamp !== 10 ** 16) {
+			sendMessage({ uid: uid, msg: input, t: timestamp })
 		}
-	}, [inputTimestamp, input])
+	}, [input, timestamp])
 
 	return (
 		<div id='chat'>
@@ -74,10 +79,10 @@ export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 			{uid && (
 				<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
 					<UserInput
-						inputTimestamp={inputTimestamp}
-						handleInputTimestamp={handleInputTimestamp}
-						handleInput={handleInput}
 						input={input}
+						timestamp={timestamp}
+						handleInput={handleInput}
+						handleTimestamp={handleTimestamp}
 					/>
 				</TextBubble>
 			)}
