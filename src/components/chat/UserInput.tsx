@@ -22,7 +22,7 @@ export default function UserInput(props: any) {
 		}
 
 		// Start timestamp on first input
-		if (props.inputTimestamp === 10 ** 16 && !props.input) {
+		if (props.inputTimestamp === 10 ** 16 && !props.input && isValid) {
 			props.handleInputTimestamp('focus')
 		}
 

@@ -1,33 +1,28 @@
 import { useEffect, useState } from 'react'
 import TextBubble from './TextBubble'
 import UserInput from './UserInput'
-import { Log } from '../../types/Log'
-import { Message } from '../../types/Message'
+import { Log } from '../../types/log'
+import { Names } from '../../types/names'
+import { Message } from '../../types/message'
 import './Chat.css'
 
-let serverlog: Log[] = [
-	[1681374302892, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo !' }],
-	[1681374306782, { uid: '9tAOsihMDteoNd9xZBO9fCYNmX52', msg: 'walo' }],
-	[1681374307204, { uid: '9tAOsihMDteoNd9xZBO9fCYNmX52', msg: 'walo' }],
-	[1681374307635, { uid: '9tAOsihMDteoNd9xZBO9fCYNmX52', msg: 'walo' }],
-	[1681374308076, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo !' }],
-	[1681374308579, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo !' }],
-	[1681374309051, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo !' }],
-	[1681374309517, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo :)' }],
-	[1681374309940, { uid: '2EQbfOlT4MN5uFIPxmwOs8h6zVN2', msg: 'walo :)' }],
-]
+type Chat = {
+	uid: string | null
+	names: Names
+	serverLogs: Log[]
+	sendMessage: (log: Log) => void
+}
 
-export default function Chat({ name, uid }: { name: string; uid?: string }) {
+export default function Chat({ uid, names, serverLogs, sendMessage }: Chat) {
 	const [inputTimestamp, setInputTimestamp] = useState(10 ** 16)
 	const [input, setInput] = useState('')
+	const userFirstName = (uid: string) => names[uid] || 'user'
 
-	serverlog = serverlog.sort((a, b) => a[0] - b[0])
-
-	const messages: Message[] = serverlog.map(([t, log]) => ({
+	const messages: Message[] = serverLogs.map(([t, log]) => ({
 		t: t,
 		msg: log.msg,
-		author: log.uid,
 		self: log.uid === uid,
+		author: userFirstName(log.uid),
 	}))
 
 	// Divide messages between older and newer messages
@@ -43,7 +38,6 @@ export default function Chat({ name, uid }: { name: string; uid?: string }) {
 
 			if (input && uid) {
 				handleInput('')
-				serverlog.push([inputTimestamp, { uid: uid, msg: input }])
 			}
 		}
 	}
@@ -56,8 +50,9 @@ export default function Chat({ name, uid }: { name: string; uid?: string }) {
 		// ... send to database when timestamp updates
 		// ... it means new response has dropped
 		// ... holy hell !
-
-		console.log(inputTimestamp, { uid: uid, msg: input })
+		if (uid && inputTimestamp !== 10 ** 16) {
+			sendMessage([inputTimestamp, { uid: uid, msg: input }])
+		}
 	}, [inputTimestamp, input])
 
 	return (
@@ -67,7 +62,7 @@ export default function Chat({ name, uid }: { name: string; uid?: string }) {
 			))}
 
 			{uid && (
-				<TextBubble message={{ t: 0, author: uid, msg: '', self: true }}>
+				<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
 					<UserInput
 						inputTimestamp={inputTimestamp}
 						handleInputTimestamp={handleInputTimestamp}

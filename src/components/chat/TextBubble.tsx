@@ -1,5 +1,5 @@
 import { ReactElement } from 'react'
-import { Message } from '../../types/Message'
+import { Message } from '../../types/message'
 import './TextBubble.css'
 
 type TextBubble = {

@@ -1,27 +1,15 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { User, getAuth, onAuthStateChanged, getRedirectResult } from 'firebase/auth'
-import { getDatabase, ref, set, get, onValue } from 'firebase/database'
+import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
+import { getDatabase, ref, set, get, onValue, DataSnapshot } from 'firebase/database'
 import { initializeApp } from 'firebase/app'
 
 import Login from './components/Login'
 import Logout from './components/Logout'
 import Chat from './components/chat/Chat'
 
-// async function writeUserData(userId: string, name: string, email: string, imageUrl: string) {
-// 	const dbRef = ref(getDatabase())
-// 	const snapshot = await get(child(dbRef, `users/${userId}`))
-
-// 	if (snapshot.exists()) {
-// 		return // Don't save if user is already registered
-// 	}
-
-// 	set(ref(getDatabase(), 'users/' + userId), {
-// 		username: name,
-// 		email: email,
-// 		profile_picture: imageUrl,
-// 	})
-// }
+import { Names } from './types/names'
+import { Log } from './types/log'
 
 const firebaseConfig = {
 	databaseURL: import.meta.env.VITE_DATABASEURL,
@@ -38,65 +26,88 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const database = getDatabase()
 
+async function getNameOnLogin(user: User) {
+	const dbref = ref(database, 'names/' + user.uid)
+	const snapshot = await get(dbref)
+	let name = ''
+
+	if (snapshot.exists() && snapshot.val()) {
+		name = snapshot.val()
+	} else {
+		name = (user.displayName || 'user')?.split(' ')[0]
+		set(dbref, name)
+	}
+
+	return name
+}
+
+const defaultLogs: Log[] = [
+	[1, { uid: 'guy1', msg: 'walo ???' }],
+	[2, { uid: 'guy2', msg: 'waalo !' }],
+]
+
+const defaultNames: Names = {
+	guy1: 'Jean-Louis',
+	guy2: 'Julien',
+}
+
 export default function Root() {
-	const [uid, setUid] = useState('')
-	const [name, setName] = useState('')
+	const [uid, setUid] = useState<string | null>(null)
+	const [names, setNames] = useState<Names>(defaultNames)
+	const [serverLogs, setServerLogs] = useState<Log[]>(defaultLogs)
 
-	async function submitPseudo(e: FormEvent) {
-		e.preventDefault()
+	function sendMessage(log: Log) {
+		set(ref(database, 'log/' + log[0]), log[1])
+	}
 
-		console.log(e)
-		return
+	function handleLogs(snapshot: DataSnapshot) {
+		const data = snapshot.val()
+		if (!data) return
 
-		const snapshot = await get(ref(database, 'users/'))
+		console.log('updates')
 
-		if (snapshot.exists() && !Object.values(snapshot.val()).includes(e)) {
-			set(ref(database, 'users/' + uid), e)
-		} else {
-			console.log('Error')
+		const logs = Object.entries(data)
+		const message = logs[0][1]
+
+		if (message) {
+			setServerLogs([...logs.sort()] as unknown as Log[])
 		}
 	}
 
-	// useEffect(() => {
-	// 	onValue(ref(database, 'users/' + uid), (snapshot) => {
-	// 		const data = snapshot.val()
-	// 		console.log(data)
-	// 	})
-	// }, [uid])
+	function handleNames(snapshot: DataSnapshot) {
+		const data = snapshot.val()
+		if (!data) return
+
+		setNames(data)
+	}
 
 	useEffect(() => {
-		getRedirectResult(auth).then((result) => {
-			if (result?.user) setUid(result.user.uid)
-		})
-
 		onAuthStateChanged(auth, (user) => {
 			if (user?.displayName) {
-				setName(user.displayName?.split(' ')[0])
 				setUid(user.uid)
+				get(ref(database, 'log/')).then((snapshot) => handleLogs(snapshot))
+				get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 			} else {
-				setName('')
-				setUid('')
+				setUid(null)
+				setNames(defaultNames)
+				setServerLogs(defaultLogs)
 			}
-
-			// get(ref(database, 'users/' + user?.uid)).then((snapshot) => {
-			// 	setPpImage(user?.photoURL || '')
-			// 	setUid(user?.uid || '')
-			// 	setPseudo(snapshot.val())
-			// })
 		})
+
+		// Get updates only if logged in
+		onValue(ref(database, 'log/'), (snapshot) => (uid ? handleLogs(snapshot) : null))
+		onValue(ref(database, 'names/'), (snapshot) => (uid ? handleNames(snapshot) : null))
 	}, [])
 
 	return (
 		<>
-			{/* <Header pseudo={pseudo} ppImage={ppImage}></Header> */}
-
 			<main>
 				<div className='title'>
 					<h1>Walo</h1>
 					<p>no chat, only walo</p>
 				</div>
 
-				<Chat name={name} uid={uid} />
+				<Chat uid={uid} names={names} sendMessage={sendMessage} serverLogs={serverLogs} />
 
 				{uid ? <Logout /> : <Login />}
 			</main>

@@ -24,10 +24,10 @@
 
 .bubble p {
 	margin: 0;
+	text-align: left;
 }
 
 .bubble .b-author {
-	text-align: left;
 	opacity: 0.7;
 }
 
