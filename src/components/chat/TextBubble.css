@@ -16,8 +16,8 @@
 	margin: 0.5em 1em;
 	padding: 1em 2em;
 	color: white;
-	font-weight: bolder;
 	width: max-content;
+	max-width: calc(100% - 2em);
 	border-radius: 6px;
 	background-color: lightcoral;
 }
@@ -42,4 +42,9 @@
 	border: none;
 	outline: none;
 	background-color: transparent;
+}
+
+.bubble input::placeholder {
+	opacity: 0.5;
+	color: white;
 }
