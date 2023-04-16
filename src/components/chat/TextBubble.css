@@ -30,6 +30,7 @@ main.loading .bubble-line {
 .bubble p {
 	margin: 0;
 	text-align: left;
+	word-break: break-word;
 }
 
 .bubble .b-author {

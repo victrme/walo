@@ -24,7 +24,7 @@ export default function UserInput(props: UserInputProps) {
 	function handleUserMessage(event: FormEvent<HTMLInputElement>) {
 		const nativeEvent = event?.nativeEvent as InputEvent | undefined
 		const val = event.currentTarget.value
-		const isValid = val === '' || val.match(regexp)
+		const isValid = val.match(regexp) && val.length <= 64
 
 		if (!nativeEvent) {
 			event.preventDefault()
@@ -62,6 +62,7 @@ export default function UserInput(props: UserInputProps) {
 				spellCheck='false'
 				autoComplete='false'
 				placeholder='lâche un walo'
+				maxLength={64}
 				value={props.input}
 				onChange={(e) => handleUserMessage(e)}
 			/>
