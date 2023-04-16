@@ -23,16 +23,6 @@ import Chat from './components/chat/Chat'
 import { Names } from './types/names'
 import { Log } from './types/log'
 
-const defaultLogs: Log[] = [
-	{ t: 1, uid: 'guy1', msg: 'walo ???' },
-	{ t: 2, uid: 'guy2', msg: 'waalo !' },
-]
-
-const defaultNames: Names = {
-	guy1: 'Jean-Louis',
-	guy2: 'Julien',
-}
-
 const firebaseConfig = {
 	databaseURL: import.meta.env.VITE_DATABASEURL,
 	apiKey: import.meta.env.VITE_APIKEY,
@@ -51,10 +41,11 @@ const queryContrains = [limitToLast(100), orderByChild('t')]
 const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
 
 export default function Root() {
+	const [loading, setLoading] = useState(true)
 	const [uid, setUid] = useState<string | null>(null)
 	const [msgKey, setMsgKey] = useState<string | null>(null)
-	const [names, setNames] = useState<Names>(defaultNames)
-	const [serverLogs, setServerLogs] = useState<Log[]>(defaultLogs)
+	const [names, setNames] = useState<Names>({})
+	const [serverLogs, setServerLogs] = useState<Log[]>([])
 
 	function sendMessage(log: Log) {
 		//
@@ -77,7 +68,7 @@ export default function Root() {
 	}
 
 	function handleLogs(snapshot: DataSnapshot) {
-		const data = snapshot.val() ?? []
+		const data = snapshot.val() ?? [{ t: 0, uid: '', msg: 'walo' }]
 		const logs = Object.values(data)
 
 		if (!logs) return
@@ -87,6 +78,10 @@ export default function Root() {
 
 	function handleMessageKey(val: string | null) {
 		setMsgKey(val)
+	}
+
+	function handleLoadingState() {
+		if (loading) setLoading(false)
 	}
 
 	function handleNames(snapshot: DataSnapshot) {
@@ -110,13 +105,12 @@ export default function Root() {
 			if (user?.displayName) {
 				setUid(user.uid)
 				addNameOnFirstLogin(user)
-				get(queryLogs).then((snapshot) => handleLogs(snapshot))
-				get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 			} else {
 				setUid(null)
-				setNames(defaultNames)
-				setServerLogs(defaultLogs)
 			}
+
+			get(queryLogs).then((snapshot) => handleLogs(snapshot))
+			get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 		})
 
 		onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
@@ -128,9 +122,17 @@ export default function Root() {
 		}
 	}, [])
 
+	useEffect(() => {
+		if (loading && serverLogs.length > 0) {
+			handleLoadingState()
+			const chat = document.querySelector('#chat')
+			chat?.scrollTo(0, chat.scrollHeight)
+		}
+	}, [serverLogs])
+
 	return (
 		<>
-			<main>
+			<main className={loading ? 'loading' : ''}>
 				<div className='title'>
 					<h1>Walo</h1>
 					<p>no chat, only walo</p>
@@ -143,6 +145,7 @@ export default function Root() {
 					sendMessage={sendMessage}
 					handleMessageKey={handleMessageKey}
 				/>
+
 				<Login uid={uid} />
 			</main>
 		</>

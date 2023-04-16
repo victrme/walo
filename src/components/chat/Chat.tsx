@@ -76,7 +76,7 @@ export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMes
 		<div id='chat'>
 			<MessageList list={messagesOld} />
 
-			{uid && (
+			{uid && serverLogs.length > 0 && (
 				<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
 					<UserInput
 						input={input}

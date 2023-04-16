@@ -1,5 +1,10 @@
 .bubble-line {
 	width: 100%;
+	transition: opacity 0.05s;
+}
+
+main.loading .bubble-line {
+	opacity: 0;
 }
 
 .bubble-line.self {

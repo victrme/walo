@@ -1,8 +1,7 @@
 #chat {
+	height: 60vh;
 	width: 460px;
 	max-width: 100%;
-	min-height: 400px;
-	max-height: 60vh;
 	overflow-y: scroll;
 	overflow-x: hidden;
 	padding: 2em;
@@ -11,7 +10,7 @@
 	border-radius: 1em;
 }
 
-#chat * {
+#chat > div {
 	overflow-anchor: none;
 }
 
