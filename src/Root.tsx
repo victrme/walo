@@ -39,6 +39,7 @@ const auth = getAuth(app)
 const database = getDatabase()
 const queryContrains = [limitToLast(100), orderByChild('t')]
 const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
+let isWatching = false
 
 export default function Root() {
 	const [loading, setLoading] = useState(true)
@@ -100,26 +101,34 @@ export default function Root() {
 		}
 	}
 
+	function removeDatabaseEvents() {
+		off(ref(database, 'logs/'))
+		off(ref(database, 'names/'))
+	}
+
 	useEffect(() => {
 		onAuthStateChanged(auth, (user) => {
 			if (user?.displayName) {
 				setUid(user.uid)
 				addNameOnFirstLogin(user)
+
+				if (!isWatching) {
+					onValue(queryLogs, (snapshot) => handleLogs(snapshot))
+					onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
+					isWatching = true
+				}
 			} else {
 				setUid(null)
+				removeDatabaseEvents()
+				isWatching = false
 			}
-
-			get(queryLogs).then((snapshot) => handleLogs(snapshot))
-			get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 		})
 
-		onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
-		onValue(queryLogs, (snapshot) => handleLogs(snapshot))
+		// Get server logs once every startups
+		get(queryLogs).then((snapshot) => handleLogs(snapshot))
+		get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
 
-		return () => {
-			off(ref(database, 'logs/'))
-			off(ref(database, 'names/'))
-		}
+		return removeDatabaseEvents()
 	}, [])
 
 	useEffect(() => {
