@@ -1,5 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
 :root {
-	font-family: monospace;
+	font-family: 'Source Code Pro', monospace;
 	line-height: 1.5;
 	font-weight: 400;
 	font-synthesis: none;
@@ -7,6 +8,28 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-text-size-adjust: 100%;
+
+	--color-title: 108, 88, 76;
+	--color-background: #f0ead2;
+	--color-chat: #eee5c1;
+	--color-text: #fff;
+	--color-bubble: #a98467;
+	--color-bubble-self: #adc178;
+	--color-login-background: #fff;
+	--color-login-border: #dadce0;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-title: 202, 210, 197;
+		--color-background: #2f3e46;
+		--color-chat: #3c4b53;
+		--color-text: #eee;
+		--color-bubble: #84a98c;
+		--color-bubble-self: #52796f;
+		--color-login-background: #ddd;
+		--color-login-border: #aaa;
+	}
 }
 
 * {
@@ -15,29 +38,34 @@
 
 body {
 	margin: 0;
+	background-color: var(--color-background);
 }
 
 main {
+	display: grid;
 	max-width: 700px;
+	max-height: 90vh;
 	margin: auto;
 	padding: 2em;
+	row-gap: 3em;
+	grid-template-rows: 1fr 6fr 1fr;
 }
 
 main .title {
-	margin: 2em 2em 4em 2em;
-	padding: 3em 0;
-	color: #396bc9;
+	padding: 2em 0;
+	color: rgb(var(--color-title));
 	font-weight: bolder;
 	text-align: center;
-	background: white;
-	background-image: radial-gradient(#4686ff8c 1px, transparent 0);
-	background-size: 0.8em 0.8em;
+	background: transparent;
+	background-image: radial-gradient(rgba(var(--color-title), 0.3) 1px, transparent 0);
+	background-size: 1em 1em;
 }
 
 main .title h1 {
 	display: block;
 	text-align: center;
 	margin: 0;
+	line-height: 1.2;
 }
 
 main .title p {
@@ -46,7 +74,7 @@ main .title p {
 
 @media screen and (max-width: 500px) {
 	main .title {
-		margin: 1em 3em 3em 3em;
+		font-size: 1em;
 		padding: 1.5em;
 	}
 

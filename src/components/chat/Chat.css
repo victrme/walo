@@ -1,12 +1,12 @@
 #chat {
 	height: 60vh;
+	min-height: 300px;
 	width: 460px;
-	max-width: 100%;
 	overflow-y: scroll;
 	overflow-x: hidden;
 	padding: 2em;
-	margin: auto auto 4em auto;
-	background-color: #fafafa;
+	margin: auto;
+	background-color: var(--color-chat);
 	border-radius: 1em;
 }
 
@@ -17,4 +17,11 @@
 #chat #scroll-anchor {
 	overflow-anchor: auto;
 	height: 1px;
+}
+
+@media screen and (max-width: 500px) {
+	#chat {
+		padding: 1em;
+		width: 100%;
+	}
 }

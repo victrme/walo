@@ -16,8 +16,8 @@ main.loading #login {
 	margin: auto;
 	padding: 12px;
 	border-radius: 4px;
-	border: 1px solid #dadce0;
-	background: #fff;
+	border: 1px solid var(--color-login-border);
+	background: var(--color-login-background);
 	color: #3c4043;
 	letter-spacing: 0.1px;
 	font-size: 14px;
