@@ -54,13 +54,11 @@ export default function UserInput(props: UserInputProps) {
 	}
 
 	return (
-		<form action='' onSubmit={(e) => applyMessage(e)}>
+		<form action='' onSubmit={(e) => applyMessage(e)} autoComplete='off' autoCorrect='off'>
 			<input
 				type='text'
 				id='chat-input'
 				name='chat-input'
-				spellCheck='false'
-				autoComplete='false'
 				placeholder='lâche un walo'
 				maxLength={64}
 				value={props.input}

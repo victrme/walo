@@ -56,3 +56,9 @@ main.loading .bubble-line {
 	color: var(--color-text);
 	opacity: 0.5;
 }
+
+@media screen and (max-width: 500px) {
+	.bubble {
+		padding: 0.8em 1.5em;
+	}
+}

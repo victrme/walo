@@ -38,6 +38,7 @@
 
 body {
 	margin: 0;
+	font-size: 15px;
 	background-color: var(--color-background);
 }
 
@@ -73,6 +74,10 @@ main .title p {
 }
 
 @media screen and (max-width: 500px) {
+	body {
+		font-size: 13px;
+	}
+
 	main .title {
 		font-size: 1em;
 		padding: 1.5em;
@@ -80,5 +85,6 @@ main .title p {
 
 	main {
 		padding: 1em;
+		row-gap: 2em;
 	}
 }
