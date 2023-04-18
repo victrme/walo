@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, getAuth, signOut } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup, getAuth, signOut, Auth } from 'firebase/auth'
 import './Login.css'
 
 export default function Login({ uid }: { uid: string | null }) {
@@ -11,10 +11,22 @@ export default function Login({ uid }: { uid: string | null }) {
 
 	return (
 		<div id='login'>
-			<button onClick={handleLogin}>
-				{uid === null && <img src='google.svg' width={20} height={20} />}
-				<span>{uid ? 'Se déconnecter' : 'Se connecter avec Google'}</span>
-			</button>
+			{uid ? (
+				<div className='logged-in'>
+					<p className='user'>
+						<img src={auth.currentUser?.photoURL || 'google.svg'} alt='Photo de profil' draggable='false' />
+						<span>{auth.currentUser?.displayName || 'Jean-Alfred Cointreau'}</span>
+					</p>
+					<button onClick={handleLogin}>Se déconnecter</button>
+				</div>
+			) : (
+				<div className='logged-out'>
+					<button onClick={handleLogin}>
+						<img src='google.svg' width={20} height={20} />
+						<span>Se connecter avec Google</span>
+					</button>
+				</div>
+			)}
 		</div>
 	)
 }

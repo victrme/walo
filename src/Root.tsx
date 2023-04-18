@@ -108,7 +108,7 @@ export default function Root() {
 
 	useEffect(() => {
 		onAuthStateChanged(auth, (user) => {
-			if (user?.displayName) {
+			if (user?.uid) {
 				setUid(user.uid)
 				addNameOnFirstLogin(user)
 
@@ -155,7 +155,15 @@ export default function Root() {
 					handleMessageKey={handleMessageKey}
 				/>
 
-				<Login uid={uid} />
+				<div id='bottom'>
+					<Login uid={uid} />
+
+					<div id='out-links'>
+						<a href='https://victr.me'>victr.me</a>
+						<a href='https://github.com/victrme/walo'>Code source</a>
+						<a href='https://github.com/victrme/walo/PRIVACY.md'>Confidentialité</a>
+					</div>
+				</div>
 			</main>
 		</>
 	)
