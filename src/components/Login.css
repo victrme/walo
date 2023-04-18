@@ -28,9 +28,6 @@ main.loading #login {
 	background-color: rgba(var(--color-title), 0.05);
 }
 
-#login .logged-in .user {
-}
-
 #login .logged-in .user img {
 	width: 1.4em;
 	height: 1.4em;
