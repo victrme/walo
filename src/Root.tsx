@@ -161,7 +161,7 @@ export default function Root() {
 					<div id='out-links'>
 						<a href='https://victr.me'>victr.me</a>
 						<a href='https://github.com/victrme/walo'>Code source</a>
-						<a href='https://github.com/victrme/walo/PRIVACY.md'>Confidentialité</a>
+						<a href='https://github.com/victrme/walo/blob/main/PRIVACY.md'>Confidentialité</a>
 					</div>
 				</div>
 			</main>
