@@ -9,6 +9,7 @@ import { FormEvent } from 'react'
  *      The regexp is still valid when not all characters are included (eg: "wal", "w", "waaaaalllll")
  */
 const regexp = /^(w+(a+(l+(o+[^\w]*)?)?)?)?$/i
+const symbols = /^[~`!@#$%^&*()_+\-=\[\]\\{}|;':",.\/<>?\sa-zA-Z\p{Emoji}]*$/u
 const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
 
 type UserInputProps = {
@@ -20,11 +21,10 @@ type UserInputProps = {
 
 export default function UserInput(props: UserInputProps) {
 	//
-
 	function handleUserMessage(event: FormEvent<HTMLInputElement>) {
 		const nativeEvent = event?.nativeEvent as InputEvent | undefined
 		const val = event.currentTarget.value
-		const isValid = val.match(regexp) && val.length <= 64
+		const isValid = val.match(regexp) && val.length <= 64 && val.match(symbols)
 
 		if (!nativeEvent) {
 			event.preventDefault()
