@@ -1,34 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
 :root {
-	font-family: 'Source Code Pro', monospace;
+	font-family: monospace;
 	line-height: 1.5;
-	font-weight: 400;
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-text-size-adjust: 100%;
-
-	--color-title: 108, 88, 76;
-	--color-background: #f0ead2;
-	--color-chat: #f5f1e1;
-	--color-text: #fff;
-	--color-bubble: #a98467;
-	--color-bubble-self: #adc178;
-	--color-login-background: #fff;
-	--color-login-border: #dadce0;
+	--color-text: #484c53;
+	--color-title: 72, 76, 83;
+	--color-background: #e3e3d9;
+	--color-chat: #aaa1;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		--color-title: 202, 210, 197;
-		--color-background: #2f3e46;
-		--color-chat: #3c4b53;
-		--color-text: #eee;
-		--color-bubble: #84a98c;
-		--color-bubble-self: #52796f;
-		--color-login-background: #ddd;
-		--color-login-border: #aaa;
+		--color-background: #313338;
+		--color-chat: #fff1;
+		--color-text: #adb3aa;
 	}
 }
 
@@ -36,10 +20,18 @@
 	box-sizing: border-box;
 }
 
-body {
+*:focus-visible {
+	outline: 2px solid rgba(var(--color-title), 0.5);
+}
+
+body,
+p {
 	margin: 0;
-	font-size: 15px;
-	color: rgb(var(--color-title));
+}
+
+body {
+	font-size: 16px;
+	color: var(--color-text);
 	background-color: var(--color-background);
 }
 
@@ -50,7 +42,6 @@ main {
 	margin: auto;
 	padding: 2em;
 	row-gap: 3em;
-	grid-template-rows: 1fr 6fr 1fr;
 }
 
 main .title {
@@ -59,8 +50,8 @@ main .title {
 	font-weight: bolder;
 	text-align: center;
 	background: transparent;
-	background-image: radial-gradient(rgba(var(--color-title), 0.3) 1px, transparent 0);
-	background-size: 1em 1em;
+	background-image: radial-gradient(rgba(var(--color-title), 0.1) 1px, transparent 0);
+	background-size: 6px 6px;
 }
 
 main .title h1 {
@@ -86,24 +77,18 @@ main #bottom {
 }
 
 main #out-links {
-	display: flex;
-	justify-content: space-around;
-	flex-direction: column;
-	max-width: 100%;
 	text-align: right;
 }
 
 main #out-links a {
-	color: rgb(var(--color-title));
-	text-decoration: none;
+	color: inherit;
 	font-size: 0.9em;
-	opacity: 0.8;
+	text-decoration: none;
 }
 
 main #out-links a:hover,
-main #out-links a:hover {
+main #out-links a:focus-visible {
 	text-decoration: underline;
-	opacity: 1;
 }
 
 @media screen and (max-width: 500px) {
@@ -122,9 +107,7 @@ main #out-links a:hover {
 	}
 
 	main #bottom {
-		padding-left: 1em;
-		flex-direction: column;
-		align-items: baseline;
+		padding: 0 1em;
 	}
 
 	main #out-links {

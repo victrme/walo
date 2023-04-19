@@ -134,8 +134,11 @@ export default function Root() {
 	useEffect(() => {
 		if (loading && serverLogs.length > 0) {
 			handleLoadingState()
-			const chat = document.querySelector('#chat')
+
+			const chat = document.querySelector<HTMLDivElement>('#chat')
+			const input = document.querySelector<HTMLInputElement>('#chat form input')
 			chat?.scrollTo(0, chat.scrollHeight)
+			input?.focus()
 		}
 	}, [serverLogs])
 
@@ -159,8 +162,12 @@ export default function Root() {
 					<Login uid={uid} />
 
 					<div id='out-links'>
-						<a href='https://victr.me'>victr.me</a>
-						<a href='https://github.com/victrme/walo'>Code source</a>
+						<p>
+							<a href='https://victr.me'>victr.me</a>
+						</p>
+						<p>
+							<a href='https://github.com/victrme/walo'>Code source</a>
+						</p>
 					</div>
 				</div>
 			</main>
