@@ -78,6 +78,7 @@ main #bottom {
 	gap: 2em 1em;
 	width: 100%;
 	max-width: 460px;
+	min-height: 5em;
 }
 
 main #out-links {
