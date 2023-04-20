@@ -56,8 +56,8 @@ body {
 
 main {
 	display: grid;
-	max-width: 700px;
-	min-width: 320px;
+	max-width: 36em;
+	min-width: 28em;
 	max-height: 90vh;
 	margin: auto;
 	padding: 2em;
@@ -65,7 +65,7 @@ main {
 }
 
 main .title {
-	padding: 2em 0 0 0;
+	padding-top: 2em;
 	color: rgb(var(--color-title));
 	width: max-content;
 	margin: auto;
@@ -88,7 +88,6 @@ main #bottom {
 	padding: 0 1em;
 	gap: 2em 1em;
 	width: 100%;
-	max-width: 460px;
 	min-height: 5em;
 }
 
@@ -114,24 +113,22 @@ main #out-links a:focus-visible {
 }
 
 @media screen and (max-height: 900px) {
+	body {
+		font-size: 14px;
+	}
+
 	main .title {
-		padding: 0;
+		padding-top: 1em;
 	}
 }
 
 @media screen and (max-width: 500px) {
 	body {
-		font-size: 13px;
+		font-size: 12px;
 	}
 
 	main .title {
-		font-size: 1em;
-		padding: 1em;
-	}
-
-	main {
-		padding: 1em 2em;
-		row-gap: 2em;
+		padding-top: 0;
 	}
 
 	main.user-out #bottom {
