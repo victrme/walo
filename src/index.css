@@ -17,11 +17,22 @@
 		--color-background: #313338;
 		--color-chat: #3c4b53;
 		--color-chat-text: #eee;
-		--color-bubble: #84a98c;
-		--color-bubble-self: #52796f;
+		--color-bubble: #6c8c73;
+		--color-bubble-self: #46685f;
 		--color-login-background: #ddd;
 		--color-login-border: #aaa;
 	}
+}
+
+::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+	background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 4px;
+	background-color: rgba(var(--color-title), 0.4);
 }
 
 * {
