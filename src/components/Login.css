@@ -24,7 +24,7 @@ main.loading #login {
 	border-color: rgba(var(--color-title), 0.5);
 }
 
-#login .logged-out button:hover {
+#login button:hover {
 	background-color: rgba(var(--color-title), 0.05);
 }
 

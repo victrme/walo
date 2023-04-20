@@ -7,32 +7,39 @@ main.loading .bubble-line {
 	opacity: 0;
 }
 
+.bubble-line.self .b-author {
+	display: none;
+}
+
 .bubble-line.self {
 	text-align: right;
+}
+
+.bubble-line.self .bubble {
+	background-color: var(--color-bubble-self);
 }
 
 .bubble {
 	display: inline-block;
 	width: max-content;
 	min-width: 12em;
-	max-width: 70%;
-	margin: 0.5em 0;
+	max-width: 100%;
+	margin: 0.4em 0;
+	padding: 0.6em 1.2em;
 	text-align: left;
 	font-weight: bold;
+	border-radius: 0.5em;
+	background-color: var(--color-bubble);
 }
 
 .bubble p {
 	margin: 0;
-	display: inline;
 	word-break: break-all;
 }
 
 .bubble .b-author {
 	opacity: 0.7;
-}
-
-.bubble .b-author::after {
-	content: ': ';
+	font-weight: normal;
 }
 
 .bubble .b-message {

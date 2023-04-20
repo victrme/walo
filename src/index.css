@@ -1,18 +1,26 @@
 :root {
 	font-family: monospace;
 	line-height: 1.5;
-	--color-text: #484c53;
-	--color-title: 72, 76, 83;
-	--color-background: #e3e3d9;
-	--color-chat: #aaa1;
+	--color-title: 108, 88, 76;
+	--color-background: #f0ead2;
+	--color-chat: #f5f1e1;
+	--color-chat-text: #fff;
+	--color-bubble: #a98467;
+	--color-bubble-self: #adc178;
+	--color-login-background: #fff;
+	--color-login-border: #dadce0;
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		--color-title: 202, 210, 197;
 		--color-background: #313338;
-		--color-chat: #fff1;
-		--color-text: #adb3aa;
+		--color-chat: #3c4b53;
+		--color-chat-text: #eee;
+		--color-bubble: #84a98c;
+		--color-bubble-self: #52796f;
+		--color-login-background: #ddd;
+		--color-login-border: #aaa;
 	}
 }
 
@@ -30,8 +38,8 @@ p {
 }
 
 body {
-	font-size: 16px;
-	color: var(--color-text);
+	font-size: 15px;
+	color: rgb(var(--color-title));
 	background-color: var(--color-background);
 }
 
@@ -45,20 +53,15 @@ main {
 }
 
 main .title {
-	padding: 2em 0;
+	padding: 2em 0 0 0;
 	color: rgb(var(--color-title));
-	font-weight: bolder;
-	text-align: center;
-	background: transparent;
-	background-image: radial-gradient(rgba(var(--color-title), 0.1) 1px, transparent 0);
-	background-size: 6px 6px;
+	width: max-content;
+	margin: auto;
 }
 
 main .title h1 {
-	display: block;
-	text-align: center;
+	line-height: 1em;
 	margin: 0;
-	line-height: 1.2;
 }
 
 main .title p {
@@ -67,30 +70,40 @@ main .title p {
 
 main #bottom {
 	display: flex;
-	margin: auto;
-	gap: 2em;
-	width: 100%;
-	max-width: 460px;
+	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
-	white-space: nowrap;
+	margin: auto;
+	gap: 1em;
+	width: 100%;
+	max-width: 460px;
 }
 
 main #out-links {
 	text-align: right;
+	width: 6em;
 }
 
 main #out-links a {
+	opacity: 0.8;
 	color: inherit;
 	font-size: 0.9em;
+	border-radius: 4px;
 	text-decoration: none;
-	opacity: 0.8;
 }
 
-main #out-links a:hover,
-main #out-links a:focus-visible {
+main #out-links a:hover {
 	text-decoration: underline;
 	opacity: 1;
+}
+
+main #out-links a:focus-visible {
+}
+
+@media screen and (max-height: 900px) {
+	main .title {
+		padding: 0;
+	}
 }
 
 @media screen and (max-width: 500px) {
@@ -100,7 +113,7 @@ main #out-links a:focus-visible {
 
 	main .title {
 		font-size: 1em;
-		padding: 1.5em;
+		padding: 1em;
 	}
 
 	main {

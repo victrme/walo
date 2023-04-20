@@ -6,7 +6,11 @@
 	overflow-x: hidden;
 	padding: 1.5em;
 	margin: auto;
-	border: 1px solid rgba(var(--color-title), 0.1);
+	color: var(--color-chat-text);
+	border-radius: 1em;
+	background: transparent;
+	background-size: 10px 10px;
+	background-image: radial-gradient(rgba(var(--color-title), 0.2) 1px, transparent 0);
 }
 
 #chat > div {
