@@ -4,7 +4,9 @@
 }
 
 main.loading .bubble-line {
-	opacity: 0;
+	opacity: 0.5;
+	filter: contrast(0);
+	user-select: none;
 }
 
 .bubble-line.self .b-author {
@@ -48,8 +50,12 @@ main.loading .bubble-line {
 	letter-spacing: 0.6px;
 }
 
-.bubble form {
-	display: inline;
+main .user-input {
+	display: none;
+}
+
+main.user-in:not(.loading) .user-input {
+	display: block;
 }
 
 .bubble input {

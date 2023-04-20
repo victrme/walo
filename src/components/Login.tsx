@@ -12,7 +12,7 @@ export default function Login({ uid }: { uid: string | null }) {
 	return (
 		<div id='login'>
 			{uid ? (
-				<div className='logged-in'>
+				<>
 					<p className='user'>
 						<img
 							src={auth.currentUser?.photoURL || 'google.svg'}
@@ -23,14 +23,12 @@ export default function Login({ uid }: { uid: string | null }) {
 						<span>{auth.currentUser?.displayName || 'Jean-Alfred Cointreau'}</span>
 					</p>
 					<button onClick={handleLogin}>Se déconnecter</button>
-				</div>
+				</>
 			) : (
-				<div className='logged-out'>
-					<button onClick={handleLogin}>
-						<img src='google.svg' width={20} height={20} alt='Google icon' />
-						<span>Se connecter avec Google</span>
-					</button>
-				</div>
+				<button className='google-login' onClick={handleLogin}>
+					<img src='google.svg' width={20} height={20} alt='' />
+					<span>Se connecter avec Google</span>
+				</button>
 			)}
 		</div>
 	)

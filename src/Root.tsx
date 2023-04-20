@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 
 import { initializeApp } from 'firebase/app'
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
@@ -45,12 +45,16 @@ const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
 })
 
+function mockLogs() {
+	return Array.from({ length: 20 }, (_, i) => ({ t: i, uid: '', msg: 'walo' }))
+}
+
 export default function Root() {
 	const [loading, setLoading] = useState(true)
 	const [uid, setUid] = useState<string | null>(null)
 	const [msgKey, setMsgKey] = useState<string | null>(null)
+	const [serverLogs, setServerLogs] = useState<Log[]>(mockLogs())
 	const [names, setNames] = useState<Names>({})
-	const [serverLogs, setServerLogs] = useState<Log[]>([])
 
 	function sendMessage(log: Log) {
 		//
@@ -77,16 +81,13 @@ export default function Root() {
 		const logs = Object.values(data)
 
 		if (!logs) return
+		if (loading) setLoading(false)
 
 		setServerLogs(logs as Log[])
 	}
 
 	function handleMessageKey(val: string | null) {
 		setMsgKey(val)
-	}
-
-	function handleLoadingState() {
-		if (loading) setLoading(false)
 	}
 
 	function handleNames(snapshot: DataSnapshot) {
@@ -135,20 +136,21 @@ export default function Root() {
 		return removeDatabaseEvents()
 	}, [])
 
-	useEffect(() => {
-		if (loading && serverLogs.length > 0) {
-			handleLoadingState()
+	useLayoutEffect(() => {
+		const chat = document.querySelector<HTMLDivElement>('#chat')
+		chat?.scrollTo(0, chat.scrollHeight)
+	}, [])
 
-			const chat = document.querySelector<HTMLDivElement>('#chat')
+	useLayoutEffect(() => {
+		if (uid && !loading) {
 			const input = document.querySelector<HTMLInputElement>('#chat form input')
-			chat?.scrollTo(0, chat.scrollHeight)
 			input?.focus()
 		}
-	}, [serverLogs])
+	}, [loading, uid])
 
 	return (
 		<>
-			<main className={loading ? 'loading' : ''}>
+			<main className={(loading ? 'loading ' : '') + (uid ? 'user-in' : 'user-out')}>
 				<div className='title'>
 					<h1>Walo</h1>
 					<p>no chat, only walo</p>

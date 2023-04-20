@@ -14,17 +14,15 @@ type Chat = {
 	handleMessageKey: (val: string | null) => void
 }
 
-function MessageList(props: { list: Message[] }) {
-	return (
-		<>
-			{props.list.map((elem) => (
-				<div key={elem.t}>
-					<TextBubble message={elem} />
-				</div>
-			))}
-		</>
-	)
-}
+const MessageList = (props: { list: Message[] }) => (
+	<>
+		{props.list.map((elem) => (
+			<div key={elem.t} className={'bubble-line' + (elem.self ? ' self' : '')}>
+				<TextBubble message={elem} />
+			</div>
+		))}
+	</>
+)
 
 export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMessage }: Chat) {
 	const [input, setInput] = useState('')
@@ -76,15 +74,17 @@ export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMes
 		<div id='chat'>
 			<MessageList list={messagesOld} />
 
-			{uid && serverLogs.length > 0 && (
-				<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
-					<UserInput
-						input={input}
-						timestamp={timestamp}
-						handleInput={handleInput}
-						handleTimestamp={handleTimestamp}
-					/>
-				</TextBubble>
+			{uid && (
+				<div className={'bubble-line self user-input'}>
+					<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
+						<UserInput
+							input={input}
+							timestamp={timestamp}
+							handleInput={handleInput}
+							handleTimestamp={handleTimestamp}
+						/>
+					</TextBubble>
+				</div>
 			)}
 
 			<MessageList list={messagesNew} />

@@ -46,6 +46,7 @@ body {
 main {
 	display: grid;
 	max-width: 700px;
+	min-width: 320px;
 	max-height: 90vh;
 	margin: auto;
 	padding: 2em;
@@ -70,11 +71,11 @@ main .title p {
 
 main #bottom {
 	display: flex;
-	flex-wrap: wrap;
 	justify-content: space-between;
 	align-items: center;
 	margin: auto;
-	gap: 1em;
+	padding: 0 1em;
+	gap: 2em 1em;
 	width: 100%;
 	max-width: 460px;
 }
@@ -121,12 +122,11 @@ main #out-links a:focus-visible {
 		row-gap: 2em;
 	}
 
-	main #bottom {
-		padding: 0 1em;
+	main.user-out #bottom {
+		flex-direction: column;
 	}
 
-	main #out-links {
-		flex-direction: row;
-		column-gap: 1em;
+	main.user-out #out-links {
+		text-align: center;
 	}
 }
