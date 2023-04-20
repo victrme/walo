@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { initializeApp } from 'firebase/app'
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import {
 	getDatabase,
@@ -24,14 +25,13 @@ import { Names } from './types/names'
 import { Log } from './types/log'
 
 const firebaseConfig = {
-	databaseURL: import.meta.env.VITE_DATABASEURL,
 	apiKey: import.meta.env.VITE_APIKEY,
 	appId: import.meta.env.VITE_APPID,
-	projectId: 'sandbox-383306',
-	measurementId: 'G-3V500QMWL7',
-	messagingSenderId: '643065650510',
-	storageBucket: 'sandbox-383306.appspot.com',
-	authDomain: 'sandbox-383306.firebaseapp.com',
+	projectId: 'walo-chat',
+	messagingSenderId: '899004629819',
+	storageBucket: 'walo-chat.appspot.com',
+	authDomain: 'walo-chat.firebaseapp.com',
+	databaseURL: 'https://walo-chat-default-rtdb.europe-west1.firebasedatabase.app',
 }
 
 const app = initializeApp(firebaseConfig)
@@ -40,6 +40,10 @@ const database = getDatabase()
 const queryContrains = [limitToLast(100), orderByChild('t')]
 const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
 let isWatching = false
+
+const appCheck = initializeAppCheck(app, {
+	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
+})
 
 export default function Root() {
 	const [loading, setLoading] = useState(true)
