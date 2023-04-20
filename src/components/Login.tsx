@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup, getAuth, signOut, Auth } from 'firebase/auth'
+import { GoogleAuthProvider, signInWithPopup, getAuth, signOut } from 'firebase/auth'
 import './Login.css'
 
 export default function Login({ uid }: { uid: string | null }) {
