@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 
-import { initializeApp } from 'firebase/app'
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
+// import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
+import { initializeApp } from 'firebase/app'
 import {
 	getDatabase,
 	ref,
@@ -41,9 +41,9 @@ const queryContrains = [limitToLast(100), orderByChild('t')]
 const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
 let isWatching = false
 
-const appCheck = initializeAppCheck(app, {
-	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
-})
+// const appCheck = initializeAppCheck(app, {
+// 	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
+// })
 
 function mockLogs() {
 	return Array.from({ length: 20 }, (_, i) => ({ t: i, uid: '', msg: 'walo' }))
