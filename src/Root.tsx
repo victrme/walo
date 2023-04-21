@@ -118,8 +118,8 @@ export default function Root() {
 				addNameOnFirstLogin(user)
 
 				if (!isWatching) {
-					onValue(queryLogs, (snapshot) => handleLogs(snapshot))
 					onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
+					onValue(queryLogs, (snapshot) => handleLogs(snapshot))
 					isWatching = true
 				}
 			} else {
@@ -130,8 +130,8 @@ export default function Root() {
 		})
 
 		// Get server logs once every startups
-		get(queryLogs).then((snapshot) => handleLogs(snapshot))
 		get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
+		get(queryLogs).then((snapshot) => handleLogs(snapshot))
 
 		return removeDatabaseEvents()
 	}, [])

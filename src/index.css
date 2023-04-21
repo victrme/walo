@@ -56,9 +56,10 @@ body {
 
 main {
 	display: grid;
+	grid-template-rows: 1fr 10fr 1fr;
 	max-width: 36em;
 	min-width: 28em;
-	max-height: 90vh;
+	height: 90vh;
 	margin: auto;
 	padding: 2em;
 	row-gap: 3em;
@@ -127,8 +128,16 @@ main #out-links a:focus-visible {
 		font-size: 12px;
 	}
 
+	main {
+		height: 100dvh;
+	}
+
 	main .title {
 		padding-top: 0;
+	}
+
+	main.user-out {
+		grid-template-rows: 1fr 10fr 2fr;
 	}
 
 	main.user-out #bottom {
@@ -136,6 +145,12 @@ main #out-links a:focus-visible {
 	}
 
 	main.user-out #out-links {
+		width: 100%;
 		text-align: center;
+	}
+
+	main.user-out #out-links p {
+		display: inline-block;
+		margin: 0 1em;
 	}
 }
