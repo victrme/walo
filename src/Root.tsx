@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 // import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
-import { Unsubscribe, User, getAuth, onAuthStateChanged } from 'firebase/auth'
+import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
 import {
 	getDatabase,
@@ -39,13 +39,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const database = getDatabase()
-const queryContrains = [limitToLast(100), orderByChild('t')]
-const queryLogs = query(ref(database, 'logs/'), ...queryContrains)
-let isWatching = false
+const queryConstraints = [limitToLast(100), orderByChild('t')]
+const queryLogs = query(ref(database, 'logs/'), ...queryConstraints)
+let initialListener = { count: 0, done: false }
 
 // const appCheck = initializeAppCheck(app, {
 // 	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
 // })
+
+function preventFirstListenerTriggers(serverLogs: Logs) {
+	// Don't do anything on first onChildAdded trigger
+	// This counts up to the amount of log already in the serverLogs
+	// https://firebase.google.com/docs/reference/js/database#onchildadded
+	initialListener.count += 1
+
+	if (initialListener.count === Object.keys(serverLogs).length) {
+		initialListener.done = true
+	}
+}
 
 export default function Root() {
 	const [loading, setLoading] = useState(true)
@@ -54,9 +65,15 @@ export default function Root() {
 	const [serverLogs, setServerLogs] = useState<Logs>({})
 	const [names, setNames] = useState<Names>({})
 
-	let onChildAddedUnsub: Unsubscribe = () => {}
-	let onChildChangedUnsub: Unsubscribe = () => {}
-	let onChildRemovedUnsub: Unsubscribe = () => {}
+	const unsub = {
+		added: () => {},
+		changed: () => {},
+		removed: () => {}
+	}
+
+	const serverLogsRef= useRef(serverLogs)
+
+	serverLogsRef.current = serverLogs
 
 	function sendMessage(log: Log) {
 		//
@@ -91,11 +108,15 @@ export default function Root() {
 		if (listenerType === 'Get') {
 			if (loading) setLoading(false)
 			setServerLogs(snapshot.val())
+			handleNames(snapshot.val())
 			return
 		}
 
+
 		const key = snapshot.key
-		if (!key) return console.warn('No key found on: ', listenerType)
+		if (!key) {
+			return console.warn('No key found on: ', listenerType)
+		}
 
 		if (listenerType === 'Removed') {
 			setServerLogs((current) => {
@@ -109,12 +130,13 @@ export default function Root() {
 		}
 
 		if (listenerType === 'Added') {
-			setServerLogs((current) => ({ ...current, [key]: snapshot.val() }))
+			if (!initialListener.done) {
+				preventFirstListenerTriggers(serverLogsRef.current)
+				return
+			}
 
-			const oldestTimestamp = 0
-			const queryContrains = [orderByChild('last'), startAt(oldestTimestamp)]
-			const namesSnapshot = await get(query(ref(database, 'names/'), ...queryContrains))
-			handleNames(namesSnapshot)
+			setServerLogs((current) => ({ ...current, [key]: snapshot.val() }))
+			handleNames(serverLogsRef.current)
 		}
 	}
 
@@ -122,17 +144,28 @@ export default function Root() {
 		setMessageKey(val)
 	}
 
-	function handleNames(snapshot: DataSnapshot) {
-		const data = snapshot.val()
-		if (!data) return
+	async function handleNames(logs: Logs) {
+		const sortedLogs = Object.values(logs).sort((a, b) => a.t - b.t)
+		const timestamps = sortedLogs.map((l) => l.t)
 
-		setNames(data)
+		const queryConstrains = [orderByChild('last'), startAt(Math.min(...timestamps))]
+		const namesSnapshot = await get(query(ref(database, 'names/'), ...queryConstrains))
+		const val = namesSnapshot.val()
+
+		setNames(val)
+	}
+
+	function removeListeners() {
+		initialListener = { count: 0, done: false }
+		unsub.added()
+		unsub.changed()
+		unsub.removed()
 	}
 
 	function handleAuthState(user: User | null) {
+		removeListeners()
+
 		if (user === null) {
-			isWatching = false
-			removeListeners()
 			setUid(null)
 			return
 		}
@@ -151,29 +184,20 @@ export default function Root() {
 			setUid(user.uid)
 			addNameOnFirstLogin(user)
 
-			if (isWatching) {
-				return
-			}
-
-			onChildChangedUnsub = onChildChanged(queryLogs, (snapshot) => handleLogs(snapshot, 'Changed'))
-			onChildRemovedUnsub = onChildRemoved(queryLogs, (snapshot) => handleLogs(snapshot, 'Removed'))
-			onChildAddedUnsub = onChildAdded(queryLogs, (snapshot) => handleLogs(snapshot, 'Added'))
-			isWatching = true
+			unsub.changed = onChildChanged(queryLogs, (snapshot) => handleLogs(snapshot, 'Changed'))
+			unsub.removed = onChildRemoved(queryLogs, (snapshot) => handleLogs(snapshot, 'Removed'))
+			unsub.added = onChildAdded(queryLogs, (snapshot) => handleLogs(snapshot, 'Added'))
 		}
 	}
 
-	function removeListeners() {
-		onChildAddedUnsub()
-		onChildChangedUnsub()
-		onChildRemovedUnsub()
-	}
+
 
 	useEffect(() => {
 		onAuthStateChanged(auth, (user) => handleAuthState(user))
 		get(queryLogs).then((snapshot) => handleLogs(snapshot, 'Get'))
 
 		window.addEventListener('beforeunload', removeListeners)
-		return removeListeners
+		return () => removeListeners()
 	}, [])
 
 	useLayoutEffect(() => {

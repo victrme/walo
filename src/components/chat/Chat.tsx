@@ -15,6 +15,10 @@ type Chat = {
 	handleMessageKey: (val: string | null) => void
 }
 
+function mockLogs() {
+	return Array.from({ length: 20 }, (_, i) => ({ t: i, uid: '', msg: 'walo' }))
+}
+
 const MessageList = (props: { list: Message[] }) => (
 	<>
 		{props.list.map((elem) => (
@@ -29,7 +33,8 @@ export default function Chat({ uid, names, serverLogs, messageKey, sendMessage, 
 	const [timestamp, setTimestamp] = useState<number | null>(null)
 	const [input, setInput] = useState('')
 
-	const messages: Message[] = Object.values(serverLogs).map((log) => ({
+	const logs: Log[] = Object.values(serverLogs).length === 0 ? mockLogs() : Object.values(serverLogs)
+	const messages: Message[] = logs.map((log) => ({
 		t: log.t,
 		msg: log.msg,
 		self: log.uid === uid,
