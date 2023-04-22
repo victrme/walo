@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import TextBubble from './TextBubble'
 import UserInput from './UserInput'
-import { Log } from '../../types/log'
+import { Log, Logs } from '../../types/log'
 import { Names } from '../../types/names'
 import { Message } from '../../types/message'
 import './Chat.css'
@@ -9,7 +9,8 @@ import './Chat.css'
 type Chat = {
 	uid: string | null
 	names: Names
-	serverLogs: Log[]
+	messageKey: string | null
+	serverLogs: Logs
 	sendMessage: (log: Log) => void
 	handleMessageKey: (val: string | null) => void
 }
@@ -24,36 +25,30 @@ const MessageList = (props: { list: Message[] }) => (
 	</>
 )
 
-export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMessage }: Chat) {
+export default function Chat({ uid, names, serverLogs, messageKey, sendMessage, handleMessageKey }: Chat) {
+	const [timestamp, setTimestamp] = useState<number | null>(null)
 	const [input, setInput] = useState('')
-	const [timestamp, setTimestamp] = useState(10 ** 16)
-	const userFirstName = (uid: string) => names[uid] || 'user'
 
-	const messages: Message[] = serverLogs.map((log) => ({
+	const messages: Message[] = Object.values(serverLogs).map((log) => ({
 		t: log.t,
 		msg: log.msg,
 		self: log.uid === uid,
-		author: userFirstName(log.uid),
+		author: names[log.uid]?.name || 'user',
 	}))
 
 	// Divide messages between older and newer messages
-	const messagesOld = messages.filter((elem) => elem.t < timestamp)
-	const messagesNew = messages.filter((elem) => elem.t > timestamp)
+	const messagesOld = messages.filter((elem) => elem.t < (timestamp || 10 ** 16))
+	const messagesNew = messages.filter((elem) => elem.t > (timestamp || 10 ** 16))
 
 	function handleTimestamp(is: 'focus' | 'submit') {
-		const isDefault = timestamp === 10 ** 16
-
-		if (isDefault && is === 'focus') {
+		if (is === 'focus') {
 			setTimestamp(Date.now())
 		}
 
-		if (!isDefault && is === 'submit') {
-			setTimestamp(10 ** 16)
-
-			if (input && uid) {
-				handleInput('')
-				handleMessageKey(null)
-			}
+		if (is === 'submit') {
+			handleMessageKey(null)
+			setTimestamp(null)
+			handleInput('')
 		}
 	}
 
@@ -62,10 +57,15 @@ export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMes
 	}
 
 	useEffect(() => {
-		// ... send to database when timestamp updates
-		// ... it means new response has dropped
-		// ... holy hell !
-		if (uid && timestamp !== 10 ** 16) {
+		// When user empties the input, it removes the message from the server
+		// So to keep the form at the bottom: reset timestamp
+		if (uid && timestamp && !messageKey && input.length === 0) {
+			setTimestamp(null)
+		}
+	}, [messageKey])
+
+	useEffect(() => {
+		if (uid && timestamp) {
 			sendMessage({ uid: uid, msg: input, t: timestamp })
 		}
 	}, [input, timestamp])
@@ -75,8 +75,8 @@ export default function Chat({ uid, names, serverLogs, handleMessageKey, sendMes
 			<MessageList list={messagesOld} />
 
 			{uid && (
-				<div className={'bubble-line self user-input'}>
-					<TextBubble message={{ t: 0, author: userFirstName(uid), msg: '', self: true }}>
+				<div className='bubble-line self user-input'>
+					<TextBubble message={{ t: 0, author: '', msg: '', self: true }}>
 						<UserInput
 							input={input}
 							timestamp={timestamp}

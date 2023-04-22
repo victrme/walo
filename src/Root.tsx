@@ -1,28 +1,30 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 
 // import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
-import { User, getAuth, onAuthStateChanged } from 'firebase/auth'
+import { Unsubscribe, User, getAuth, onAuthStateChanged } from 'firebase/auth'
 import { initializeApp } from 'firebase/app'
 import {
 	getDatabase,
 	ref,
 	set,
 	get,
-	off,
 	push,
 	query,
 	update,
-	onValue,
 	limitToLast,
 	orderByChild,
 	DataSnapshot,
+	startAt,
+	onChildAdded,
+	onChildChanged,
+	onChildRemoved,
 } from 'firebase/database'
 
 import Login from './components/Login'
 import Chat from './components/chat/Chat'
 
 import { Names } from './types/names'
-import { Log } from './types/log'
+import { Log, Logs } from './types/log'
 
 const firebaseConfig = {
 	apiKey: import.meta.env.VITE_APIKEY,
@@ -45,22 +47,29 @@ let isWatching = false
 // 	provider: new ReCaptchaV3Provider('6LdnXKIlAAAAAJNhHD49z57J6VG94tHJdDc6USPu'),
 // })
 
-function mockLogs() {
-	return Array.from({ length: 20 }, (_, i) => ({ t: i, uid: '', msg: 'walo' }))
-}
-
 export default function Root() {
 	const [loading, setLoading] = useState(true)
 	const [uid, setUid] = useState<string | null>(null)
-	const [msgKey, setMsgKey] = useState<string | null>(null)
-	const [serverLogs, setServerLogs] = useState<Log[]>(mockLogs())
+	const [messageKey, setMessageKey] = useState<string | null>(null)
+	const [serverLogs, setServerLogs] = useState<Logs>({})
 	const [names, setNames] = useState<Names>({})
+
+	let onChildAddedUnsub: Unsubscribe = () => {}
+	let onChildChangedUnsub: Unsubscribe = () => {}
+	let onChildRemovedUnsub: Unsubscribe = () => {}
 
 	function sendMessage(log: Log) {
 		//
+		// Delete message
+		if (messageKey && log.msg.length === 0) {
+			set(ref(database, 'logs/' + messageKey), null)
+			handleMessageKey(null)
+			return
+		}
+
 		// Update message (other keypresses)
-		if (msgKey) {
-			update(ref(database, 'logs/' + msgKey), { msg: log.msg })
+		if (messageKey) {
+			update(ref(database, 'logs/' + messageKey), { msg: log.msg })
 			return
 		}
 
@@ -68,26 +77,49 @@ export default function Root() {
 		const dbref = ref(database, 'logs/')
 		const msgRef = push(dbref)
 
-		if (!msgRef.key) {
-			return console.error('No key for new message')
+		if (msgRef.key) {
+			update(ref(database, 'names/' + uid), { last: log.t })
+			set(ref(database, 'logs/' + msgRef.key), log)
+			handleMessageKey(msgRef.key)
 		}
-
-		set(ref(database, 'logs/' + msgRef.key), log)
-		handleMessageKey(msgRef.key)
 	}
 
-	function handleLogs(snapshot: DataSnapshot) {
-		const data = snapshot.val() ?? [{ t: 0, uid: '', msg: 'walo' }]
-		const logs = Object.values(data)
+	async function handleLogs(snapshot: DataSnapshot, listenerType: string) {
+		if (!snapshot.val()) return
 
-		if (!logs) return
-		if (loading) setLoading(false)
+		// Initial startup call to get messages
+		if (listenerType === 'Get') {
+			if (loading) setLoading(false)
+			setServerLogs(snapshot.val())
+			return
+		}
 
-		setServerLogs(logs as Log[])
+		const key = snapshot.key
+		if (!key) return console.warn('No key found on: ', listenerType)
+
+		if (listenerType === 'Removed') {
+			setServerLogs((current) => {
+				const { [key]: _, ...rest } = current
+				return rest
+			})
+		}
+
+		if (listenerType === 'Changed') {
+			setServerLogs((current) => ({ ...current, [key]: snapshot.val() }))
+		}
+
+		if (listenerType === 'Added') {
+			setServerLogs((current) => ({ ...current, [key]: snapshot.val() }))
+
+			const oldestTimestamp = 0
+			const queryContrains = [orderByChild('last'), startAt(oldestTimestamp)]
+			const namesSnapshot = await get(query(ref(database, 'names/'), ...queryContrains))
+			handleNames(namesSnapshot)
+		}
 	}
 
 	function handleMessageKey(val: string | null) {
-		setMsgKey(val)
+		setMessageKey(val)
 	}
 
 	function handleNames(snapshot: DataSnapshot) {
@@ -97,43 +129,51 @@ export default function Root() {
 		setNames(data)
 	}
 
-	async function addNameOnFirstLogin(user: User) {
-		const dbref = ref(database, 'names/' + user.uid)
-		const snapshot = await get(dbref)
+	function handleAuthState(user: User | null) {
+		if (user === null) {
+			isWatching = false
+			removeListeners()
+			setUid(null)
+			return
+		}
 
-		if (!snapshot.exists()) {
-			set(dbref, (user.displayName || 'user')?.split(' ')[0])
+		if (user) {
+			async function addNameOnFirstLogin(user: User) {
+				const dbref = ref(database, 'names/' + user.uid)
+				const snapshot = await get(dbref)
+
+				if (!snapshot.exists()) {
+					const firstName = (user.displayName || 'user')?.split(' ')[0]
+					set(dbref, { last: 0, name: firstName })
+				}
+			}
+
+			setUid(user.uid)
+			addNameOnFirstLogin(user)
+
+			if (isWatching) {
+				return
+			}
+
+			onChildChangedUnsub = onChildChanged(queryLogs, (snapshot) => handleLogs(snapshot, 'Changed'))
+			onChildRemovedUnsub = onChildRemoved(queryLogs, (snapshot) => handleLogs(snapshot, 'Removed'))
+			onChildAddedUnsub = onChildAdded(queryLogs, (snapshot) => handleLogs(snapshot, 'Added'))
+			isWatching = true
 		}
 	}
 
-	function removeDatabaseEvents() {
-		off(ref(database, 'logs/'))
-		off(ref(database, 'names/'))
+	function removeListeners() {
+		onChildAddedUnsub()
+		onChildChangedUnsub()
+		onChildRemovedUnsub()
 	}
 
 	useEffect(() => {
-		onAuthStateChanged(auth, (user) => {
-			if (user?.uid) {
-				setUid(user.uid)
-				addNameOnFirstLogin(user)
+		onAuthStateChanged(auth, (user) => handleAuthState(user))
+		get(queryLogs).then((snapshot) => handleLogs(snapshot, 'Get'))
 
-				if (!isWatching) {
-					onValue(ref(database, 'names/'), (snapshot) => handleNames(snapshot))
-					onValue(queryLogs, (snapshot) => handleLogs(snapshot))
-					isWatching = true
-				}
-			} else {
-				setUid(null)
-				removeDatabaseEvents()
-				isWatching = false
-			}
-		})
-
-		// Get server logs once every startups
-		get(ref(database, 'names/')).then((snapshot) => handleNames(snapshot))
-		get(queryLogs).then((snapshot) => handleLogs(snapshot))
-
-		return removeDatabaseEvents()
+		window.addEventListener('beforeunload', removeListeners)
+		return removeListeners
 	}, [])
 
 	useLayoutEffect(() => {
@@ -159,6 +199,7 @@ export default function Root() {
 				<Chat
 					uid={uid}
 					names={names}
+					messageKey={messageKey}
 					serverLogs={serverLogs}
 					sendMessage={sendMessage}
 					handleMessageKey={handleMessageKey}

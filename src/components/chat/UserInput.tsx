@@ -14,14 +14,14 @@ const containsWALO = /^(?=.*w)(?=.*a)(?=.*l)(?=.*o).*$/i
 
 type UserInputProps = {
 	input: string
-	timestamp: number
+	timestamp: number | null
 	handleInput: (input: string) => void
 	handleTimestamp: (is: 'focus' | 'submit') => void
 }
 
-export default function UserInput(props: UserInputProps) {
+export default function UserInput({ input, timestamp, handleInput, handleTimestamp }: UserInputProps) {
 	//
-	function handleUserMessage(event: FormEvent<HTMLInputElement>) {
+	function inputMessage(event: FormEvent<HTMLInputElement>) {
 		const nativeEvent = event?.nativeEvent as InputEvent | undefined
 		const val = event.currentTarget.value
 		const isValid = val.match(regexp) && val.length <= 64 && val.match(symbols)
@@ -32,18 +32,20 @@ export default function UserInput(props: UserInputProps) {
 		}
 
 		// Start timestamp on first input
-		if (props.timestamp === 10 ** 16 && !props.input && isValid) {
-			props.handleTimestamp('focus')
+		if (!timestamp && !input && isValid) {
+			handleTimestamp('focus')
 		}
 
-		props.handleInput(isValid ? val : props.input)
+		if (isValid || val === '') {
+			handleInput(val)
+		}
 	}
 
-	function applyMessage(event: FormEvent<HTMLFormElement>) {
+	function submitMessage(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault()
 
-		if (props.input.match(containsWALO)) {
-			props.handleTimestamp('submit')
+		if (timestamp && input.match(containsWALO)) {
+			handleTimestamp('submit')
 
 			// settimeout to wait a bit before message is added to database
 			// without wait, the input is not correctly into view
@@ -54,15 +56,15 @@ export default function UserInput(props: UserInputProps) {
 	}
 
 	return (
-		<form action='' onSubmit={(e) => applyMessage(e)} autoComplete='off' autoCorrect='off'>
+		<form action='' onSubmit={(e) => submitMessage(e)} autoComplete='off' autoCorrect='off'>
 			<input
 				type='text'
 				id='chat-input'
 				name='chat-input'
 				placeholder='lâche un walo'
 				maxLength={64}
-				value={props.input}
-				onChange={(e) => handleUserMessage(e)}
+				value={input}
+				onChange={(e) => inputMessage(e)}
 			/>
 		</form>
 	)

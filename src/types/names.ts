@@ -1,1 +1,6 @@
-export type Names = { [key: string]: string }
+export type Names = {
+	[key: string]: {
+		last: number
+		name: string
+	}
+}
