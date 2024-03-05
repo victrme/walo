@@ -7,12 +7,13 @@
 </h3>
 
 <p align="center">
-  Une chatroom en temps réel pour aggressivement saluer des amis ou inconnus, n'hésitez pas à spam !
+  Une chatroom en temps réel pour aggressivement saluer des amis ou inconnus.
 </p>
 
 <br />
 
 ### Walo
+
 _nom masculin, familier_
 
 1. Contraction des mots "ouais" et "allo", utilisé pour saluer familièrement quelqu'un : **« Walo, tu vas bien ? »**
